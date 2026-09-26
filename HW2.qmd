@@ -1,0 +1,11 @@
+---
+title: "HW2"
+author: "Steven Leone"
+format: html
+editor: visual
+---
+
+
+This is the Github Repository for STATS 506 HW2: https://github.com/leonestv-byte/506_hw2
+
+
