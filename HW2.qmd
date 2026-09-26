@@ -6,6 +6,77 @@ editor: visual
 ---
 
 
-This is the Github Repository for STATS 506 HW2: https://github.com/leonestv-byte/506_hw2
+This is the Github Repository for STATS 506 HW2: https://github.com/leonestv-byte/5å06_hw2
 
 
+## Exercise 1: Random Walk with Momentum
+
+
+A standard random walk assumes that each step is independent of all previous steps. In many real processes, however, the current movement may depend on previous movement.
+
+For example, a recent study of lab-grown diamond substrates uses a two-dimensional random walk with momentum to model the tendency of stress orientations in consecutive layers of a diamond crystal to remain similar. Higher momentum corresponds to stronger persistence between consecutive layers.
+
+At each step, the particle moves one unit in one of four directions:
+
+* right: $(+1, 0)$
+* left: $(-1, 0)$
+* up: $(0, +1)$
+* down: $(0, -1)$
+
+For the first step, choose one of the four directions with equal probability (which means, 1/4). For subsequent steps, with probability p, continue; for 1-p, choose another.
+
+a) 
+```{r}
+directions <- c("right", "left", "up", "down")
+
+choose_new_direction <- function() {
+  random_integer <- sample(1:4, 1)
+  return(directions[random_integer])
+}
+
+step <- function(direction, coordinate_x, coordinate_y) {
+  delta <- switch(direction,
+    "right" = c(1, 0),
+    "left"  = c(-1, 0),
+    "up"    = c(0, 1),
+    "down"  = c(0, -1),
+    stop("direction must be 'right', 'left', 'up', or 'down'")
+  )
+
+  coordinate_x <- coordinate_x + delta[1]
+  coordinate_y <- coordinate_y + delta[2]
+  
+  return(list(coordinate_x = coordinate_x, coordinate_y = coordinate_y))
+}
+
+momentum_walk <- function(n, p) {
+  coordinate_x <- 0
+  coordinate_y <- 0
+  
+  # First Step
+  direction <- choose_new_direction()
+  result <- step(direction, coordinate_x, coordinate_y)
+  coordinate_x <- result$coordinate_x
+  coordinate_y <- result$coordinate_y
+  
+  # Subsequent Steps
+  for (i in 2:n) {
+    my_bool <- as.logical(rbinom(1, size = 1, prob = p))
+    if (my_bool) {
+      result <- step(direction, coordinate_x, coordinate_y)
+      coordinate_x <- result$coordinate_x
+      coordinate_y <- result$coordinate_y
+    } else {
+      direction <- choose_new_direction()
+      result <- step(direction, coordinate_x, coordinate_y)
+      coordinate_x <- result$coordinate_x
+      coordinate_y <- result$coordinate_y
+    }
+  }
+  return(list(coordinate_x = coordinate_x, coordinate_y = coordinate_y))
+}
+```
+
+
+
+## Exercise 2: Monte Carlo Simulation of Campus Bus Arrivals
