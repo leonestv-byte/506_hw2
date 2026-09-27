@@ -50,6 +50,14 @@ step <- function(direction, coordinate_x, coordinate_y) {
 }
 
 momentum_walk <- function(n, p) {
+  
+  if (n < 1) {
+    stop("n must be greater than 1.")
+  }
+  if (p < 0 || p > 1) {
+    stop("p must be in between 0 and 1.")
+  }
+  
   coordinate_x <- 0
   coordinate_y <- 0
   
@@ -77,6 +85,120 @@ momentum_walk <- function(n, p) {
 }
 ```
 
+b) Implement the simulation.
+
+```{r}
+directions <- c("right", "left", "up", "down")
+
+choose_new_direction <- function() {
+  random_integer <- sample(1:4, 1)
+  return(directions[random_integer])
+}
+
+step <- function(direction, coordinate_x, coordinate_y) {
+  delta <- switch(direction,
+    "right" = c(1, 0),
+    "left"  = c(-1, 0),
+    "up"    = c(0, 1),
+    "down"  = c(0, -1),
+    stop("direction must be 'right', 'left', 'up', or 'down'")
+  )
+
+  coordinate_x <- coordinate_x + delta[1]
+  coordinate_y <- coordinate_y + delta[2]
+  
+  return(list(coordinate_x = coordinate_x, coordinate_y = coordinate_y))
+}
+
+momentum_walk1 <- function(n, p) {
+  
+  if (n < 1) {
+    stop("n must be greater than 1.")
+  }
+  if (p < 0 || p > 1) {
+    stop("p must be in between 0 and 1.")
+  }
+  
+  coordinate_x <- 0
+  coordinate_y <- 0
+  
+  # First Step
+  direction <- choose_new_direction()
+  result <- step(direction, coordinate_x, coordinate_y)
+  coordinate_x <- result$coordinate_x
+  coordinate_y <- result$coordinate_y
+  
+  # Subsequent Steps
+  for (i in 2:n) {
+    my_bool <- as.logical(rbinom(1, size = 1, prob = p))
+    if (my_bool) {
+      result <- step(direction, coordinate_x, coordinate_y)
+      coordinate_x <- result$coordinate_x
+      coordinate_y <- result$coordinate_y
+    } else {
+      direction <- choose_new_direction()
+      result <- step(direction, coordinate_x, coordinate_y)
+      coordinate_x <- result$coordinate_x
+      coordinate_y <- result$coordinate_y
+    }
+  }
+  return(list(coordinate_x = coordinate_x, coordinate_y = coordinate_y))
+}
+
+```
+
+```{r}
+
+momentum_walk2 <- function(n, p) {
+  if (n < 1) {
+    stop("n must be greater than 1.")
+  }
+  if (p < 0 || p > 1) {
+    stop("p must be in between 0 and 1.")
+  }
+  
+  direction <- choose_new_direction()
+  instructions <- sapply(seq_len(n), function(i) {
+    if (i > 1 && as.logical(rbinom(1, size = 1, prob = p))) {
+      direction <<- choose_new_direction()
+    }
+    return(direction)
+  })
+  
+  delta_x <- c(right = 1, left = -1, up = 0, down = 0)
+  delta_y <- c(right = 0, left = 0, up = 1, down = -1)
+
+  list(
+    coordinate_x = sum(delta_x[instructions]),
+    coordinate_y = sum(delta_y[instructions])
+  )
+}
+```
+
+
+c)
+
+```{r}
+set.seed(979)
+momentum_walk1(10, 0.6)
+
+set.seed(979)
+momentum_walk1(10,0.6)
+```
 
 
 ## Exercise 2: Monte Carlo Simulation of Campus Bus Arrivals
+
+
+
+## Exercise 3: Linear Regression
+
+```{r}
+youtube <- read.csv(
+  "https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2021/2021-03-02/youtube.csv"
+)
+```
+
+```{r}
+model <- lm(dislike_count ~ category_id + comment_count, data=youtube)
+```
