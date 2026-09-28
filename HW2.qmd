@@ -324,6 +324,24 @@ Version 1, with the for loop is faster. The difference is larger with larger inp
 
 ## Exercise 2: Monte Carlo Simulation of Campus Bus Arrivals
 
+
+```{r}
+rows <- sample((1:2), 10000, replace = TRUE)
+
+simulated_day <- function(i) {
+  six_eight <- sum(rpois(n = 3, lambda = 4))
+  nine <- sum(rnorm(n = 1, mean = 45, sd = 4))
+  ten_three <- sum(rpois(n = 6, lambda = 15))
+  four <- sum(rnorm(n = 1, mean = 55, sd = 5))
+  five_ten <- sum(rpois(n = 6, lambda = 9))
+  return(six_eight + nine + ten_three + four + five_ten)
+}
+
+rows <- sapply(rows, simulated_day)
+print(mean(rows))
+```
+
+
 ## Exercise 3: Linear Regression
 
 ```{r}
