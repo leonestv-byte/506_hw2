@@ -5,12 +5,9 @@ format: html
 editor: visual
 ---
 
-
 This is the Github Repository for STATS 506 HW2: https://github.com/leonestv-byte/5å06_hw2
 
-
 ## Exercise 1: Random Walk with Momentum
-
 
 A standard random walk assumes that each step is independent of all previous steps. In many real processes, however, the current movement may depend on previous movement.
 
@@ -18,14 +15,15 @@ For example, a recent study of lab-grown diamond substrates uses a two-dimension
 
 At each step, the particle moves one unit in one of four directions:
 
-* right: $(+1, 0)$
-* left: $(-1, 0)$
-* up: $(0, +1)$
-* down: $(0, -1)$
+- right: $(+1, 0)$
+- left: $(-1, 0)$
+- up: $(0, +1)$
+- down: $(0, -1)$
 
 For the first step, choose one of the four directions with equal probability (which means, 1/4). For subsequent steps, with probability p, continue; for 1-p, choose another.
 
-a) 
+a)  
+
 ```{r}
 directions <- c("right", "left", "up", "down")
 
@@ -85,7 +83,7 @@ momentum_walk <- function(n, p) {
 }
 ```
 
-b) Implement the simulation.
+b)  Implement the simulation.
 
 ```{r}
 directions <- c("right", "left", "up", "down")
@@ -175,21 +173,156 @@ momentum_walk2 <- function(n, p) {
 }
 ```
 
-
-c)
+c)  
 
 ```{r}
-set.seed(979)
-momentum_walk1(10, 0.6)
 
-set.seed(979)
-momentum_walk1(10,0.6)
+seeds <- sample(1:1000, 100)
+
+for (seed in seeds) {
+  n = 10
+  p = 0.6
+  set.seed(seed)
+  result <- momentum_walk1(n, p)
+  x_one <- result$coordinate_x
+  y_one <- result$coordinate_y
+  set.seed(seed)
+  result <- momentum_walk1(n, p)
+  x_two <- result$coordinate_x
+  y_two <- result$coordinate_y
+  stopifnot(identical(x_one, x_two))
+  stopifnot(identical(y_one, y_two))
+}
+
+print("All momentum walk 1 simulations passed and checked for equality! n = 10")
+
+for (seed in seeds) {
+  n = 10
+  p = 0.6
+  set.seed(seed)
+  result <- momentum_walk2(n, p)
+  x_one <- result$coordinate_x
+  y_one <- result$coordinate_y
+  set.seed(seed)
+  result <- momentum_walk2(n, p)
+  x_two <- result$coordinate_x
+  y_two <- result$coordinate_y
+  stopifnot(identical(x_one, x_two))
+  stopifnot(identical(y_one, y_two))
+}
+
+print("All momentum walk 2 simulations passed and checked for equality! n = 10")
+
+
+for (seed in seeds) {
+  n = 100
+  p = 0.6
+  set.seed(seed)
+  result <- momentum_walk1(n, p)
+  x_one <- result$coordinate_x
+  y_one <- result$coordinate_y
+  set.seed(seed)
+  result <- momentum_walk1(n, p)
+  x_two <- result$coordinate_x
+  y_two <- result$coordinate_y
+  stopifnot(identical(x_one, x_two))
+  stopifnot(identical(y_one, y_two))
+}
+
+print("All momentum walk 1 simulations passed and checked for equality! n = 100")
+
+for (seed in seeds) {
+  n = 100
+  p = 0.6
+  set.seed(seed)
+  result <- momentum_walk2(n, p)
+  x_one <- result$coordinate_x
+  y_one <- result$coordinate_y
+  set.seed(seed)
+  result <- momentum_walk2(n, p)
+  x_two <- result$coordinate_x
+  y_two <- result$coordinate_y
+  stopifnot(identical(x_one, x_two))
+  stopifnot(identical(y_one, y_two))
+}
+
+print("All momentum walk 2 simulations passed and checked for equality! n = 100")
 ```
 
+d)
+
+```{r}
+ps = c(0, 0.5, 0.9)
+
+distances <- c(0, 0, 0)
+
+i <- 1
+for (p in ps) {
+  result <- momentum_walk1(1000, p)
+  d <- sqrt((result$coordinate_x **2) + (result$coordinate_y **2))
+  distances[i] <- d
+  i <- i + 1
+}
+print(distances)
+```
+
+Increasing momentum increases distance. With p at 0.9, we rarely change direction, and do not retread ground - we see this with a 164.1 distance covered.
+
+
+e) 
+```{r}
+ps = c(0, 0.25, 0.5, 0.75,  0.9)
+
+distances <- c(0, 0, 0, 0, 0)
+
+i <- 1
+for (p in ps) {
+  d <- 0
+  for (j in 1:1000) {
+    result <- momentum_walk1(1000, p)
+    d <- d + sqrt((result$coordinate_x **2) + (result$coordinate_y **2))
+  }
+  d <- d / 1000
+  distances[i] <- d
+  i <- i + 1
+}
+print(distances)
+
+data.frame(ps, distances)
+knitr::kable(data.frame(ps, distances))
+```
+There is more distance as p increases.
+
+f) 
+
+```{r}
+install.packages("microbenchmark")
+library(microbenchmark)
+
+
+```
+```{r}
+
+n = 1000
+p = 0.6
+benchmark_results <- microbenchmark(
+  v1 = momentum_walk1(n, p),
+  v2 = momentum_walk2(n, p)
+)
+print(benchmark_results)
+
+n = 100000
+p = 0.6
+benchmark_results <- microbenchmark(
+  v1 = momentum_walk1(n, p),
+  v2 = momentum_walk2(n, p)
+)
+print(benchmark_results)
+
+```
+Version 1, with the for loop is faster. The difference is larger with larger input, as we rack up more time with more runs. The algorithms have different time complexities, which makes the first one faster.
 
 ## Exercise 2: Monte Carlo Simulation of Campus Bus Arrivals
-
-
 
 ## Exercise 3: Linear Regression
 
