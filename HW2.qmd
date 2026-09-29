@@ -5,7 +5,7 @@ format: html
 editor: visual
 ---
 
-This is the Github Repository for STATS 506 HW2: https://github.com/leonestv-byte/5å06_hw2
+This is the Github Repository for STATS 506 HW2: https://github.com/leonestv-byte/506_hw2
 
 ## Exercise 1: Random Walk with Momentum
 
@@ -249,7 +249,7 @@ for (seed in seeds) {
 print("All momentum walk 2 simulations passed and checked for equality! n = 100")
 ```
 
-d)
+d)  
 
 ```{r}
 ps = c(0, 0.5, 0.9)
@@ -268,8 +268,8 @@ print(distances)
 
 Increasing momentum increases distance. With p at 0.9, we rarely change direction, and do not retread ground - we see this with a 164.1 distance covered.
 
+e)  
 
-e) 
 ```{r}
 ps = c(0, 0.25, 0.5, 0.75,  0.9)
 
@@ -291,9 +291,10 @@ print(distances)
 data.frame(ps, distances)
 knitr::kable(data.frame(ps, distances))
 ```
+
 There is more distance as p increases.
 
-f) 
+f)  
 
 ```{r}
 install.packages("microbenchmark")
@@ -301,6 +302,7 @@ library(microbenchmark)
 
 
 ```
+
 ```{r}
 
 n = 1000
@@ -320,10 +322,10 @@ benchmark_results <- microbenchmark(
 print(benchmark_results)
 
 ```
+
 Version 1, with the for loop is faster. The difference is larger with larger input, as we rack up more time with more runs. The algorithms have different time complexities, which makes the first one faster.
 
 ## Exercise 2: Monte Carlo Simulation of Campus Bus Arrivals
-
 
 ```{r}
 rows <- sample((1:2), 10000, replace = TRUE)
@@ -341,7 +343,6 @@ rows <- sapply(rows, simulated_day)
 print(mean(rows))
 ```
 
-
 ## Exercise 3: Linear Regression
 
 ```{r}
@@ -353,3 +354,11 @@ youtube <- read.csv(
 ```{r}
 model <- lm(dislike_count ~ category_id + comment_count, data=youtube)
 ```
+
+a)  
+
+b)  
+
+c)  
+
+d)  
