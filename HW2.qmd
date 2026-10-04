@@ -1,5 +1,5 @@
 ---
-title: "HW2"
+title: "HW2.qmd"
 author: "Steven Leone"
 format: html
 editor: visual
@@ -7,7 +7,7 @@ editor: visual
 
 This is the Github Repository for STATS 506 HW2: https://github.com/leonestv-byte/506_hw2
 
-## Exercise 1: Random Walk with Momentum
+# Problem 1: Random Walk with Momentum
 
 A standard random walk assumes that each step is independent of all previous steps. In many real processes, however, the current movement may depend on previous movement.
 
@@ -22,7 +22,9 @@ At each step, the particle moves one unit in one of four directions:
 
 For the first step, choose one of the four directions with equal probability (which means, 1/4). For subsequent steps, with probability p, continue; for 1-p, choose another.
 
-a)  
+## A) Simulation function
+
+Write a function (momentum_walk(n, p)). Sanitize the input.
 
 ```{r}
 directions <- c("right", "left", "up", "down")
@@ -83,7 +85,23 @@ momentum_walk <- function(n, p) {
 }
 ```
 
-b)  Implement the simulation.
+```{r}
+momentum_walk(10, 0.6)
+```
+
+```{r}
+momentum_walk(10, 0.6)
+```
+
+## B) Implement the simulation
+
+Version 1: write the function momentum_walk1(n, p) using a loop ( a for loop or a while loop).
+
+Version 2: write the function momentum_walk2(n, p) using one of the apply functions (choose an appropriate member of the apply family).
+
+In Version 1, we use a loop. The first direction is chosen randomly, and we update the starting coordinates as such. We use a loop to proceed and use a random number to determine if we get a new direction, and we update the starting coordinates appropriately for all n spaces.
+
+In Version 2, we make use of sapply. After defining an array of size n, we use an anonymous inner function and sapply to decide when we change direction, and we end up creating an array of the directions taken, labelled as instructions. We use a map of coordinate updates for each instruction in order to sum the changes to our starting direction.
 
 ```{r}
 directions <- c("right", "left", "up", "down")
@@ -173,7 +191,29 @@ momentum_walk2 <- function(n, p) {
 }
 ```
 
-c)  
+```{r}
+momentum_walk1(10, 0.6)
+```
+
+```{r}
+momentum_walk2(10, 0.6)
+```
+
+```{r}
+momentum_walk1(1000, 0.6)
+```
+
+```{r}
+momentum_walk2(1000, 0.6)
+```
+
+## C) Reproducibility
+
+Random simulations normally give different results each time they are run. Find a way to control R’s random-number generation so that your results are reproducible.
+
+Choose one of your implementations from part 1-a, demonstrate reproducibility. Explain what you did and why it works.
+
+Answer: What we did is create a list of 100 random seeds. We run the simulation for momentum walk 1 100 times with each seed and again with the same seed, and we verify that the results match. Thus, if there are no differences after reproducing with 100 different seeds, taken everytime we run, we can assume equivalence. In the end, set.seed() is all that mattered to guarantee reproducibility.
 
 ```{r}
 
@@ -249,7 +289,9 @@ for (seed in seeds) {
 print("All momentum walk 2 simulations passed and checked for equality! n = 100")
 ```
 
-d)  
+## D) Does momentum matter?
+
+Now consider three different momentum probabilities: p = 0; p = 0.5; p = 0.9.For each value of p, simulate a walk of 1000 steps. Does increasing momentum appear to increase or decrease the final distance? Explain your reasoning (optional).
 
 ```{r}
 ps = c(0, 0.5, 0.9)
@@ -266,9 +308,13 @@ for (p in ps) {
 print(distances)
 ```
 
-Increasing momentum increases distance. With p at 0.9, we rarely change direction, and do not retread ground - we see this with a 164.1 distance covered.
+Answer: Momentum is the tendency to keep moving in the same direction as our previous step. Increasing momentum increases distance. With p at 0.9, we rarely change direction, and do not retread ground - we see this with a 164.1 distance covered. Our reasoning is that, with a higher momentum, we do not change direction and retread direction.
 
-e)  
+## E) Monte Carlo simulation.
+
+A single simulation is not enough to determine the typical behavior of a random process. Use Monte Carlo simulation to investigate how momentum affects the final distance.
+
+For each of: p = 0, 0.25, 0.5, 0.75, 0.9, simulate 1,000 independent walks, each consisting of 1,000 steps. For each value of p, calculate the mean final distance. Print out your results in a table with two columns: p and mean_distance. How does the mean final distance change as p increases?
 
 ```{r}
 ps = c(0, 0.25, 0.5, 0.75,  0.9)
@@ -288,19 +334,17 @@ for (p in ps) {
 }
 print(distances)
 
-data.frame(ps, distances)
-knitr::kable(data.frame(ps, distances))
+
+knitr::kable(data.frame(ps, distances), col.names = c("p", "mean_distance"))
 ```
 
-There is more distance as p increases.
+The mean final distance increases as p increases.
 
-f)  
+## F) Compare computational performance.
 
 ```{r}
-install.packages("microbenchmark")
+#| echo: false
 library(microbenchmark)
-
-
 ```
 
 ```{r}
@@ -320,12 +364,15 @@ benchmark_results <- microbenchmark(
   v2 = momentum_walk2(n, p)
 )
 print(benchmark_results)
-
 ```
 
-Version 1, with the for loop is faster. The difference is larger with larger input, as we rack up more time with more runs. The algorithms have different time complexities, which makes the first one faster.
+Version 1, with the for loop is faster. The difference is larger with larger input, as we rack up more time with more runs. In other words, if Version 2 takes 10% more time, 10% increases significantly when we have 150 ms vs 10 ms. The algorithms have different time complexities as well. The second one, with sapply, calls an R function every step, which adds function call and enclosing variable update overhead. These factors ultimately make the Version 1 faster.
 
-## Exercise 2: Monte Carlo Simulation of Campus Bus Arrivals
+# Problem 2: Monte Carlo Simulation of Campus Bus Arrivals
+
+The number of passengers boarding a campus bus varies throughout the day. During most hours, the number of passengers can be modeled using a Poisson distribution. During the morning and afternoon peak periods, passenger volume is much higher and is modeled using a Normal distribution.
+
+Use a Monte Carlo simulation to estimate the average total number of passengers who board the bus during one day. Simulate 10,000 days and use your simulation results to estimate the expected total number of passengers who board the bus per day.
 
 ```{r}
 rows <- sample((1:2), 10000, replace = TRUE)
@@ -340,25 +387,728 @@ simulated_day <- function(i) {
 }
 
 rows <- sapply(rows, simulated_day)
-print(mean(rows))
+print(paste("Expected Passenger Total: ", round(mean(rows), 4)))
 ```
 
-## Exercise 3: Linear Regression
+# Problem 3: Linear Regression
+
+Use the code from the instructions to download the YouTube Super Bowl commercials data. The goal of this problem is to investigate which characteristics of Super Bowl commercials, if any, are associated with YouTube engagement.
+
+## A) Data preparation and de-identification
+
+Often in data analysis, we need to de-identify a dataset. Although this is especially important when working with data about people, we will practice the same idea here.
+
+Remove all variables that could uniquely identify a particular commercial. This includes variables such as the brand, title, URLs, YouTube channel, and publication information.
+
+After removing these variables, report the dimensions of the resulting dataset.
 
 ```{r}
-youtube <- read.csv(
-  "https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2021/2021-03-02/youtube.csv"
+
+youtube <- read.csv("https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2021/2021-03-02/youtube.csv")
+
+print("These are the column names of the dataframe before we de-identify: ")
+print(colnames(youtube))
+print(paste("There are ", nrow(youtube), " rows and ", ncol(youtube), " columns before we de-identify."))
+
+print("Now, we de-identify.")
+youtube <- youtube[, !names(youtube) %in% c("brand", "title", "youtube_url", "superbowl_ads_dot_com_url", "id", "thumbnail", "published_at", "description", "channel_title", "etag")]
+print("These are the column names of the dataframe after we de-identify: ")
+print(colnames(youtube))
+print(paste("There are ", nrow(youtube), " rows and ", ncol(youtube), " columns after we de-identify."))
+```
+
+## B) Exploring potential outcomes
+
+Consider each of the YouTube engagement variables. For each variable, examine its distribution and determine which of the following categories is most appropriate.
+
+1.  The variable can be used as is as the outcome in a linear regression model.
+
+2.  The variable should be transformed before being used as the outcome in a linear regression model.
+
+3.  The variable is not appropriate to use as the outcome in a linear regression model.
+
+Briefly justify your decision for each variable. If you decide that a transformation is needed, perform an appropriate transformation and use the transformed variable for the remainder of the problem.
+
+We answer this question for each variable below. In general, all 5 metrics measure engagement on the youtube platform in some manner, so, they are therefore appropriate values to predict with linear regression. Linear Regression will technically work for all problems, however, we see in our Exploratory Data Analysis and prior research that youtube metrics are skewed as some videos achieve millions of views while others achieve very little - therefore, we may apply box cox to transform much of our data into a normal distribution. If the data is all the same value, we don't use it.
+
+### View Counts
+
+The data is right tailed, it has a skew greater than 13. The variable can be used as is as the outcome in a linear regression model. However, due to the skew, we decide to transform using box cox it so that it is normally distributed. Therefore, the answer is (2) The variable should be transformed before being used as the outcome in a linear regression model.
+
+```{r}
+#| echo: false
+
+
+x <- na.omit(youtube$view_count)
+
+# Mode: most frequent value(s)
+freq <- table(x)
+mode_value <- paste(names(freq)[freq == max(freq)], collapse = ", ")
+
+results <- data.frame(
+  Mean   = mean(x),
+  Median = median(x),
+  Mode   = mode_value,
+  Range  = diff(range(x)),
+  SD     = sd(x),
+  Skew   = mean((x - mean(x))^3) / mean((x - mean(x))^2)^(3/2)
 )
+
+results
 ```
 
 ```{r}
-model <- lm(dislike_count ~ category_id + comment_count, data=youtube)
+#| echo: false
+library(ggplot2)
+library(scales)
+
+p <- ggplot(data.frame(view_count = youtube$view_count), aes(x = view_count)) +
+  geom_density(fill = "#800080", color = "#800099",
+               alpha = 0.45, linewidth = 1) +
+  geom_vline(aes(xintercept = mean(youtube$view_count, na.rm = TRUE), color = "Mean"),
+             linetype = "dashed", linewidth = 0.8) +
+  geom_vline(aes(xintercept = median(youtube$view_count, na.rm = TRUE), color = "Median"),
+             linetype = "dotted", linewidth = 0.9) +
+  scale_color_manual(
+    name = NULL,
+    values = c("Mean" = "#0000FF", "Median" = "#059669")
+  ) +
+  scale_x_continuous(labels = label_comma()) +
+  scale_y_continuous(labels = label_scientific()) +
+  coord_cartesian(xlim = c(0, NA)) +
+  labs(
+    title = "Distribution of YouTube Video Views",
+    subtitle = paste0(
+      "Videos: ", comma(length(youtube$view_count)),
+      "  |  Mean: ", comma(round(mean(youtube$view_count, na.rm = TRUE))),
+      "  |  Median: ", comma(round(median(youtube$view_count, na.rm = TRUE))), 
+      "  |  Sd: ", comma(round(sd(youtube$view_count, na.rm = TRUE)))
+    ),
+    x = "View count",
+    y = "Probability density"
+  ) +
+  theme_minimal(base_size = 13) +
+  theme(
+    plot.title = element_text(face = "bold", size = 18),
+    plot.subtitle = element_text(color = "grey40"),
+    panel.grid.minor = element_blank(),
+    legend.position = "top",
+    plot.caption = element_text(color = "grey50")
+  )
+suppressWarnings(print(p))
 ```
 
-a)  
+We convert it to Gaussian through Box Cox in the code below:
 
-b)  
+```{r}
+library(MASS)
 
-c)  
+view_count_clean <- youtube$view_count + 1
+box_cox_model <- lm(view_count_clean ~ 1)
+box_cox_output <- boxcox(box_cox_model)
 
-d)  
+lambda <- box_cox_output$x[which.max(box_cox_output$y)]
+
+if (lambda == 0) {
+  youtube$view_count_transformed <- log(view_count_clean)
+} else {
+  youtube$view_count_transformed <- (view_count_clean^lambda - 1) / lambda
+}
+```
+
+### Like Counts
+
+The data is right tailed, it has a skew greater than 8. The variable can be used as is as the outcome in a linear regression model. However, due to the skew, we decide to transform using box cox it so that it is normally distributed. Therefore, the answer is (2) The variable should be transformed before being used as the outcome in a linear regression model.
+
+```{r}
+#| echo: false
+
+
+x <- na.omit(youtube$like_count)
+
+# Mode: most frequent value(s)
+freq <- table(x)
+mode_value <- paste(names(freq)[freq == max(freq)], collapse = ", ")
+
+results <- data.frame(
+  Mean   = mean(x),
+  Median = median(x),
+  Mode   = mode_value,
+  Range  = diff(range(x)),
+  SD     = sd(x),
+  Skew   = mean((x - mean(x))^3) / mean((x - mean(x))^2)^(3/2)
+)
+
+results
+```
+
+```{r}
+#| echo: false
+library(ggplot2)
+library(scales)
+
+p <- ggplot(data.frame(like_count = youtube$like_count), aes(x = like_count)) +
+  geom_density(fill = "#800080", color = "#800099",
+               alpha = 0.45, linewidth = 1) +
+  geom_vline(aes(xintercept = mean(youtube$like_count, na.rm = TRUE), color = "Mean"),
+             linetype = "dashed", linewidth = 0.8) +
+  geom_vline(aes(xintercept = median(youtube$like_count, na.rm = TRUE), color = "Median"),
+             linetype = "dotted", linewidth = 0.9) +
+  scale_color_manual(
+    name = NULL,
+    values = c("Mean" = "#0000FF", "Median" = "#059669")
+  ) +
+  scale_x_continuous(labels = label_comma()) +
+  scale_y_continuous(labels = label_scientific()) +
+  coord_cartesian(xlim = c(0, NA)) +
+  labs(
+    title = "Distribution of YouTube Video Likes",
+    subtitle = paste0(
+      "Videos: ", comma(length(youtube$like_count)),
+      "  |  Mean: ", comma(round(mean(youtube$like_count, na.rm = TRUE))),
+      "  |  Median: ", comma(round(median(youtube$like_count, na.rm = TRUE))), 
+      "  |  Sd: ", comma(round(sd(youtube$like_count, na.rm = TRUE)))
+    ),
+    x = "Like count",
+    y = "Probability density"
+  ) +
+  theme_minimal(base_size = 13) +
+  theme(
+    plot.title = element_text(face = "bold", size = 18),
+    plot.subtitle = element_text(color = "grey40"),
+    panel.grid.minor = element_blank(),
+    legend.position = "top",
+    plot.caption = element_text(color = "grey50")
+  )
+suppressWarnings(print(p))
+```
+
+We convert it to Gaussian through Box Cox in the code below:
+
+```{r}
+library(MASS)
+
+like_count_clean <- youtube$like_count + 1
+box_cox_model <- lm(like_count_clean ~ 1)
+box_cox_output <- boxcox(box_cox_model)
+
+lambda <- box_cox_output$x[which.max(box_cox_output$y)]
+
+if (lambda == 0) {
+  youtube$like_count_transformed <- log(like_count_clean)
+} else {
+  youtube$like_count_transformed <- (like_count_clean^lambda - 1) / lambda
+}
+```
+
+### Dislike Counts
+
+The data is right tailed, it has a skew greater than 11. The variable can be used as is as the outcome in a linear regression model. However, due to the high positive skew, we decide to transform using box cox it so that it is normally distributed. Therefore, the answer is (2) The variable should be transformed before being used as the outcome in a linear regression model.
+
+```{r}
+#| echo: false
+
+
+x <- na.omit(youtube$dislike_count)
+
+# Mode: most frequent value(s)
+freq <- table(x)
+mode_value <- paste(names(freq)[freq == max(freq)], collapse = ", ")
+
+results <- data.frame(
+  Mean   = mean(x),
+  Median = median(x),
+  Mode   = mode_value,
+  Range  = diff(range(x)),
+  SD     = sd(x),
+  Skew   = mean((x - mean(x))^3) / mean((x - mean(x))^2)^(3/2)
+)
+
+results
+```
+
+```{r}
+#| echo: false
+library(ggplot2)
+library(scales)
+
+p <- ggplot(data.frame(dislike_count = youtube$dislike_count), aes(x = dislike_count)) +
+  geom_density(fill = "#800080", color = "#800099",
+               alpha = 0.45, linewidth = 1) +
+  geom_vline(aes(xintercept = mean(youtube$dislike_count, na.rm = TRUE), color = "Mean"),
+             linetype = "dashed", linewidth = 0.8) +
+  geom_vline(aes(xintercept = median(youtube$dislike_count, na.rm = TRUE), color = "Median"),
+             linetype = "dotted", linewidth = 0.9) +
+  scale_color_manual(
+    name = NULL,
+    values = c("Mean" = "#0000FF", "Median" = "#059669")
+  ) +
+  scale_x_continuous(labels = label_comma()) +
+  scale_y_continuous(labels = label_scientific()) +
+  coord_cartesian(xlim = c(0, NA)) +
+  labs(
+    title = "Distribution of YouTube Video Dislikes",
+    subtitle = paste0(
+      "Videos: ", comma(length(youtube$dislike_count)),
+      "  |  Mean: ", comma(round(mean(youtube$dislike_count, na.rm = TRUE))),
+      "  |  Median: ", comma(round(median(youtube$dislike_count, na.rm = TRUE))), 
+      "  |  Sd: ", comma(round(sd(youtube$dislike_count, na.rm = TRUE)))
+    ),
+    x = "Like count",
+    y = "Probability density"
+  ) +
+  theme_minimal(base_size = 13) +
+  theme(
+    plot.title = element_text(face = "bold", size = 18),
+    plot.subtitle = element_text(color = "grey40"),
+    panel.grid.minor = element_blank(),
+    legend.position = "top",
+    plot.caption = element_text(color = "grey50")
+  )
+suppressWarnings(print(p))
+```
+
+We convert it to Gaussian through Box Cox in the code below:
+
+```{r}
+library(MASS)
+
+dislike_count_clean <- youtube$dislike_count + 1
+box_cox_model <- lm(dislike_count_clean ~ 1)
+box_cox_output <- boxcox(box_cox_model)
+
+lambda <- box_cox_output$x[which.max(box_cox_output$y)]
+
+if (lambda == 0) {
+  youtube$dislike_count_transformed <- log(dislike_count_clean)
+} else {
+  youtube$dislike_count_transformed <- (dislike_count_clean^lambda - 1) / lambda
+}
+```
+
+### Favorite Counts
+
+Favorite Counts is different than the other variables. All of our responses are 0, as we see in the table below. Therefore, the answer is (3), The variable is not appropriate to use as the outcome in a linear regression model.
+
+```{r}
+#| echo: false
+
+
+x <- na.omit(youtube$favorite_count)
+
+# Mode: most frequent value(s)
+freq <- table(x)
+mode_value <- paste(names(freq)[freq == max(freq)], collapse = ", ")
+
+results <- data.frame(
+  Mean   = mean(x),
+  Median = median(x),
+  Mode   = mode_value,
+  Range  = diff(range(x)),
+  SD     = sd(x),
+  Skew   = mean((x - mean(x))^3) / mean((x - mean(x))^2)^(3/2)
+)
+
+results
+```
+
+```{r}
+#| echo: false
+library(ggplot2)
+library(scales)
+
+p <- ggplot(data.frame(favorite_count = youtube$favorite_count), aes(x = favorite_count)) +
+  geom_density(fill = "#800080", color = "#800099",
+               alpha = 0.45, linewidth = 1) +
+  geom_vline(aes(xintercept = mean(youtube$favorite_count, na.rm = TRUE), color = "Mean"),
+             linetype = "dashed", linewidth = 0.8) +
+  geom_vline(aes(xintercept = median(youtube$favorite_count, na.rm = TRUE), color = "Median"),
+             linetype = "dotted", linewidth = 0.9) +
+  scale_color_manual(
+    name = NULL,
+    values = c("Mean" = "#0000FF", "Median" = "#059669")
+  ) +
+  scale_x_continuous(labels = label_comma()) +
+  scale_y_continuous(labels = label_scientific()) +
+  coord_cartesian(xlim = c(0, NA)) +
+  labs(
+    title = "Distribution of YouTube Video Favorite Counts",
+    subtitle = paste0(
+      "Videos: ", comma(length(youtube$favorite_count)),
+      "  |  Mean: ", comma(round(mean(youtube$favorite_count, na.rm = TRUE))),
+      "  |  Median: ", comma(round(median(youtube$favorite_count, na.rm = TRUE))), 
+      "  |  Sd: ", comma(round(sd(youtube$favorite_count, na.rm = TRUE)))
+    ),
+    x = "Like count",
+    y = "Probability density"
+  ) +
+  theme_minimal(base_size = 13) +
+  theme(
+    plot.title = element_text(face = "bold", size = 18),
+    plot.subtitle = element_text(color = "grey40"),
+    panel.grid.minor = element_blank(),
+    legend.position = "top",
+    plot.caption = element_text(color = "grey50")
+  )
+suppressWarnings(print(p))
+```
+
+### Comment Counts
+
+The data is right tailed, it has a skew greater than 7. The variable can be used as is as the outcome in a linear regression model. However, due to the high positive skew, we decide to transform using box cox it so that it is normally distributed. Therefore, the answer is (2) The variable should be transformed before being used as the outcome in a linear regression model.
+
+```{r}
+#| echo: false
+
+
+x <- na.omit(youtube$comment_count)
+
+# Mode: most frequent value(s)
+freq <- table(x)
+mode_value <- paste(names(freq)[freq == max(freq)], collapse = ", ")
+
+results <- data.frame(
+  Mean   = mean(x),
+  Median = median(x),
+  Mode   = mode_value,
+  Range  = diff(range(x)),
+  SD     = sd(x),
+  Skew   = mean((x - mean(x))^3) / mean((x - mean(x))^2)^(3/2)
+)
+
+results
+```
+
+```{r}
+#| echo: false
+library(ggplot2)
+library(scales)
+
+p <- ggplot(data.frame(comment_count = youtube$comment_count), aes(x = comment_count)) +
+  geom_density(fill = "#800080", color = "#800099",
+               alpha = 0.45, linewidth = 1) +
+  geom_vline(aes(xintercept = mean(youtube$comment_count, na.rm = TRUE), color = "Mean"),
+             linetype = "dashed", linewidth = 0.8) +
+  geom_vline(aes(xintercept = median(youtube$comment_count, na.rm = TRUE), color = "Median"),
+             linetype = "dotted", linewidth = 0.9) +
+  scale_color_manual(
+    name = NULL,
+    values = c("Mean" = "#0000FF", "Median" = "#059669")
+  ) +
+  scale_x_continuous(labels = label_comma()) +
+  scale_y_continuous(labels = label_scientific()) +
+  coord_cartesian(xlim = c(0, NA)) +
+  labs(
+    title = "Distribution of YouTube Video Favorite Counts",
+    subtitle = paste0(
+      "Videos: ", comma(length(youtube$comment_count)),
+      "  |  Mean: ", comma(round(mean(youtube$comment_count, na.rm = TRUE))),
+      "  |  Median: ", comma(round(median(youtube$comment_count, na.rm = TRUE))), 
+      "  |  Sd: ", comma(round(sd(youtube$comment_count, na.rm = TRUE)))
+    ),
+    x = "Like count",
+    y = "Probability density"
+  ) +
+  theme_minimal(base_size = 13) +
+  theme(
+    plot.title = element_text(face = "bold", size = 18),
+    plot.subtitle = element_text(color = "grey40"),
+    panel.grid.minor = element_blank(),
+    legend.position = "top",
+    plot.caption = element_text(color = "grey50")
+  )
+suppressWarnings(print(p))
+```
+
+We convert it to Gaussian through Box Cox in the code below:
+
+```{r}
+library(MASS)
+
+comment_count_clean <- youtube$comment_count + 1
+box_cox_model <- lm(dislike_count_clean ~ 1)
+box_cox_output <- boxcox(box_cox_model)
+
+lambda <- box_cox_output$x[which.max(box_cox_output$y)]
+
+if (lambda == 0) {
+  youtube$comment_count_transformed <- log(comment_count_clean)
+} else {
+  youtube$comment_count_transformed <- (comment_count_clean^lambda - 1) / lambda
+}
+
+```
+
+## C) Fitting linear regression models.
+
+For each outcome from part 3-b that you determined was appropriate for linear regression, fit separate linear regression models to investigate its relationship with each of the seven binary characteristics of the commercials.
+
+Use one binary commercial characteristic as the primary predictor. Include year as a continuous covariate. Report the estimated coefficient for the commercial characteristic and its p-value.
+
+### View Count
+
+```{r}
+model <- lm(view_count_transformed ~ funny + year, data = youtube)
+summary(model)
+
+print(paste("The coefficient for funny is ", coef(model)["funnyTRUE"]))
+
+print(paste("The p value for funny is ", summary(model)$coefficients["funnyTRUE", "Pr(>|t|)"]))
+
+model <- lm(view_count_transformed ~ show_product_quickly + year, data = youtube)
+summary(model)
+
+print(paste("The coefficient for show product quickly is ", coef(model)["show_product_quicklyTRUE"]))
+
+print(paste("The p value for show product quickly is ", summary(model)$coefficients["show_product_quicklyTRUE", "Pr(>|t|)"]))
+
+model <- lm(view_count_transformed ~ patriotic + year, data = youtube)
+summary(model)
+
+print(paste("The coefficient for patriotic is ", coef(model)["patrioticTRUE"]))
+
+print(paste("The p value for patriotic is ", summary(model)$coefficients["patrioticTRUE", "Pr(>|t|)"]))
+
+model <- lm(view_count_transformed ~ celebrity + year, data = youtube)
+summary(model)
+
+print(paste("The coefficient for celebrity is ", coef(model)["celebrityTRUE"]))
+
+print(paste("The p value for celebrity is ", summary(model)$coefficients["celebrityTRUE", "Pr(>|t|)"]))
+
+model <- lm(view_count_transformed ~ danger + year, data = youtube)
+summary(model)
+
+print(paste("The coefficient for danger is ", coef(model)["dangerTRUE"]))
+
+print(paste("The p value for danger is ", summary(model)$coefficients["dangerTRUE", "Pr(>|t|)"]))
+
+
+model <- lm(view_count_transformed ~ animals + year, data = youtube)
+summary(model)
+
+print(paste("The coefficient for animals is ", coef(model)["animalsTRUE"]))
+
+print(paste("The p value for animals is ", summary(model)$coefficients["animalsTRUE", "Pr(>|t|)"]))
+
+model <- lm(view_count_transformed ~ use_sex + year, data = youtube)
+summary(model)
+
+print(paste("The coefficient for use sex is ", coef(model)["use_sexTRUE"]))
+
+print(paste("The p value for use sex is ", summary(model)$coefficients["use_sexTRUE", "Pr(>|t|)"]))
+```
+
+### Like Count
+
+```{r}
+model <- lm(like_count_transformed ~ funny + year, data = youtube)
+summary(model)
+
+print(paste("The coefficient for funny is ", coef(model)["funnyTRUE"]))
+
+print(paste("The p value for funny is ", summary(model)$coefficients["funnyTRUE", "Pr(>|t|)"]))
+
+model <- lm(like_count_transformed ~ show_product_quickly + year, data = youtube)
+summary(model)
+
+print(paste("The coefficient for show product quickly is ", coef(model)["show_product_quicklyTRUE"]))
+
+print(paste("The p value for show product quickly is ", summary(model)$coefficients["show_product_quicklyTRUE", "Pr(>|t|)"]))
+
+model <- lm(like_count_transformed ~ patriotic + year, data = youtube)
+summary(model)
+
+print(paste("The coefficient for patriotic is ", coef(model)["patrioticTRUE"]))
+
+print(paste("The p value for patriotic is ", summary(model)$coefficients["patrioticTRUE", "Pr(>|t|)"]))
+
+
+model <- lm(like_count_transformed ~ celebrity + year, data = youtube)
+summary(model)
+
+print(paste("The coefficient for celebrity is ", coef(model)["celebrityTRUE"]))
+
+print(paste("The p value for celebrity is ", summary(model)$coefficients["celebrityTRUE", "Pr(>|t|)"]))
+
+
+model <- lm(like_count_transformed ~ danger + year, data = youtube)
+summary(model)
+
+print(paste("The coefficient for danger is ", coef(model)["dangerTRUE"]))
+
+print(paste("The p value for danger is ", summary(model)$coefficients["dangerTRUE", "Pr(>|t|)"]))
+
+
+model <- lm(like_count_transformed ~ animals + year, data = youtube)
+summary(model)
+
+print(paste("The coefficient for animals is ", coef(model)["animalsTRUE"]))
+
+print(paste("The p value for animals is ", summary(model)$coefficients["animalsTRUE", "Pr(>|t|)"]))
+
+
+model <- lm(like_count_transformed ~ use_sex + year, data = youtube)
+summary(model)
+
+print(paste("The coefficient for use sex is ", coef(model)["use_sexTRUE"]))
+
+print(paste("The p value for use sex is ", summary(model)$coefficients["use_sexTRUE", "Pr(>|t|)"]))
+```
+
+### Dislike Count
+
+```{r}
+model <- lm(dislike_count_transformed ~ funny + year, data = youtube)
+summary(model)
+
+print(paste("The coefficient for funny is ", coef(model)["funnyTRUE"]))
+
+print(paste("The p value for funny is ", summary(model)$coefficients["funnyTRUE", "Pr(>|t|)"]))
+
+model <- lm(dislike_count_transformed ~ show_product_quickly + year, data = youtube)
+summary(model)
+
+print(paste("The coefficient for show product quickly is ", coef(model)["show_product_quicklyTRUE"]))
+
+print(paste("The p value for show product quickly is ", summary(model)$coefficients["show_product_quicklyTRUE", "Pr(>|t|)"]))
+
+model <- lm(dislike_count_transformed ~ patriotic + year, data = youtube)
+summary(model)
+
+print(paste("The coefficient for patriotic is ", coef(model)["patrioticTRUE"]))
+
+print(paste("The p value for patriotic is ", summary(model)$coefficients["patrioticTRUE", "Pr(>|t|)"]))
+
+
+model <- lm(dislike_count_transformed ~ celebrity + year, data = youtube)
+summary(model)
+
+print(paste("The coefficient for celebrity is ", coef(model)["celebrityTRUE"]))
+
+print(paste("The p value for celebrity is ", summary(model)$coefficients["celebrityTRUE", "Pr(>|t|)"]))
+
+
+model <- lm(dislike_count_transformed ~ danger + year, data = youtube)
+summary(model)
+
+print(paste("The coefficient for danger is ", coef(model)["dangerTRUE"]))
+
+print(paste("The p value for danger is ", summary(model)$coefficients["dangerTRUE", "Pr(>|t|)"]))
+
+
+model <- lm(dislike_count_transformed ~ animals + year, data = youtube)
+summary(model)
+
+print(paste("The coefficient for animals is ", coef(model)["animalsTRUE"]))
+
+print(paste("The p value for animals is ", summary(model)$coefficients["animalsTRUE", "Pr(>|t|)"]))
+
+
+model <- lm(dislike_count_transformed ~ use_sex + year, data = youtube)
+summary(model)
+
+print(paste("The coefficient for use sex is ", coef(model)["use_sexTRUE"]))
+
+print(paste("The p value for use sex is ", summary(model)$coefficients["use_sexTRUE", "Pr(>|t|)"]))
+```
+
+### Comment Count
+
+```{r}
+model <- lm(comment_count_transformed ~ funny + year, data = youtube)
+summary(model)
+
+print(paste("The coefficient for funny is ", coef(model)["funnyTRUE"]))
+
+print(paste("The p value for funny is ", summary(model)$coefficients["funnyTRUE", "Pr(>|t|)"]))
+
+model <- lm(comment_count_transformed ~ show_product_quickly + year, data = youtube)
+summary(model)
+
+print(paste("The coefficient for show product quickly is ", coef(model)["show_product_quicklyTRUE"]))
+
+print(paste("The p value for show product quickly is ", summary(model)$coefficients["show_product_quicklyTRUE", "Pr(>|t|)"]))
+
+model <- lm(comment_count_transformed ~ patriotic + year, data = youtube)
+summary(model)
+
+print(paste("The coefficient for patriotic is ", coef(model)["patrioticTRUE"]))
+
+print(paste("The p value for patriotic is ", summary(model)$coefficients["patrioticTRUE", "Pr(>|t|)"]))
+
+model <- lm(comment_count_transformed ~ celebrity + year, data = youtube)
+summary(model)
+
+print(paste("The coefficient for celebrity is ", coef(model)["celebrityTRUE"]))
+
+print(paste("The p value for celebrity is ", summary(model)$coefficients["celebrityTRUE", "Pr(>|t|)"]))
+
+
+model <- lm(comment_count_transformed ~ danger + year, data = youtube)
+summary(model)
+
+print(paste("The coefficient for danger is ", coef(model)["dangerTRUE"]))
+
+print(paste("The p value for danger is ", summary(model)$coefficients["dangerTRUE", "Pr(>|t|)"]))
+
+
+model <- lm(comment_count_transformed ~ animals + year, data = youtube)
+summary(model)
+
+print(paste("The coefficient for animals is ", coef(model)["animalsTRUE"]))
+
+print(paste("The p value for animals is ", summary(model)$coefficients["animalsTRUE", "Pr(>|t|)"]))
+
+model <- lm(comment_count_transformed ~ use_sex + year, data = youtube)
+summary(model)
+
+print(paste("The coefficient for use sex is ", coef(model)["use_sexTRUE"]))
+
+print(paste("The p value for use sex is ", summary(model)$coefficients["use_sexTRUE", "Pr(>|t|)"]))
+
+```
+
+Now, summarize your findings:
+
+1.  Which commercial characteristics have a statistically significant association with each engagement outcome at the 𝛼 = 0.05 significance level?
+
+Answer: The year is statistically significant for almost every single model; other variables are not. The year is only not statistically significant when we use it with the variables use sex, celebrity, and patriotic for estimating comment count, and the variables use sex, animals, danger, and celebrity for estimating view count. We do not have any statistically significant associations for boolean variables.
+
+2.  For each statistically significant association, state whether the association is positive or negative.
+
+Answer: The year is a statistically significantly positive association whenever it is statistically significant; there are no other statistically significant associations.
+
+3.  Identify which commercial characteristic has the largest positive estimated association with view counts.
+
+Answer: Danger is the closest commercial characteristic that is also a boolean to being statistically significant with a positive association to view count, with a p value of 0.108 and a coefficient of 0.78585 for view count. The year by far has the largest statistically significant association, with a p value less than alpha.
+
+## D) Estimating regression coefficients using matrix algebra.
+
+Consider only the view count outcome from part 3-b. Choose the binary commercial characteristic that had the smallest p-value for predicting view counts in part 3-c. Fit the model; Without using lm(), calculate the estimated regression coefficients. Fit the same model using lm() and confirm that the estimated coefficients are the same, up to numerical precision.
+
+The smallest p value comes from the variable danger. We use B = (X^TX)^(-1)X\^TY to fit a model.
+
+```{r}
+y <- youtube$view_count_transformed
+y[is.na(y)] <- 0
+
+x <- youtube[, c("year", "danger")]
+x$danger <- as.integer(x$danger == TRUE)
+x <- as.matrix(cbind(1, x))
+
+
+coefficients <- solve(t(x) %*% x) %*% t(x) %*% y
+
+model <- lm(y ~ x)
+
+print(paste("Using Algebra, the intercept is ", coefficients[1], "."))
+print(paste("Using Algebra, the coefficient for year is ", coefficients[2], "."))
+print(paste("Using Algebra, the coefficient for danger is ", coefficients[3], "."))
+
+print(paste("Using lm(), the intercept is ", coef(model)["(Intercept)"], "."))
+print(paste("Using lm(), the coefficient for year is ", coef(model)["xyear"], "."))
+print(paste("Using lm(), the coefficient for danger is ", coef(model)["xdanger"], "."))
+```
+
+Overall, the intercept is the same up to the 9th digit past the decimal point (-59.9706260943532 vs -59.9706260939956), the coefficent for year is the same up to the 13th digit past the decimal point (0.0350857516317499 vs 0.0350857516315769). The coefficient for danger is the same up to the 13th digit past the decimal point (0.928486236674786 vs 0.928486236674627).
